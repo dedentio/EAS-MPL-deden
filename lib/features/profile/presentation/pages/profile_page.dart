@@ -15,7 +15,7 @@ class ProfilePage extends StatelessWidget {
               radius: 50,
               child: Icon(Icons.person, size: 50),
             ),
-            SizedBox(height: 16), // Sudah diperbaiki di sini ya Den!
+            SizedBox(height: 16), 
             Text('Deden Tio Zulfikri', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             Text('NPM: 20123009', style: TextStyle(color: Colors.grey)),
           ],
