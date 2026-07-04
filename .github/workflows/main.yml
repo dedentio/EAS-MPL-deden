@@ -1,44 +1,56 @@
-name: Flutter CI/CD Build APK Release
+name: Flutter CI/CD UAS Build
 
+# Sistem akan berjalan otomatis SETIAP KALI Anda melakukan push ke branch 'main' atau 'master'
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ main, master ]
   pull_request:
-    branches: [ "main", "master" ]
+    branches: [ main, master ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+    # 1. Mengunduh (Checkout) kode sumber dari repositori GitHub Anda
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Setup Java Development Kit (JDK)
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: '17'
+    # 2. Memasang Java (Diperlukan oleh Gradle untuk build Android)
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
 
-      - name: Setup Flutter SDK
-        uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
+    # 3. Memasang SDK Flutter di server GitHub
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+        # Anda bisa mengunci versi Flutter tertentu jika diinginkan, contoh: flutter-version: '3.22.0'
 
-      - name: Install Dependencies
-        run: flutter pub get
+    # 4. Mengunduh dependensi proyek (termasuk dio, isar, connectivity_plus, dll)
+    - name: Install dependencies
+      run: flutter pub get
 
-      - name: Run Build Runner (Isar Generator)
-        run: flutter pub run build_runner build --delete-conflicting-outputs
+    # 5. Menjalankan code generator (Build Runner) untuk Isar Database secara otomatis
+    - name: Run build_runner Generator
+      run: dart run build_runner build --delete-conflicting-outputs
 
-      - name: Run Unit Tests
-        run: flutter test
+    # 6. Proses Kompilasi APK Mode Development (Dev)
+    - name: Build APK Dev
+      run: flutter build apk --flavor dev --release --no-tree-shake-icons
 
-      - name: Build APK PROD Release
-        run: flutter build apk --release --dart-define=ENV_NAME=PROD --dart-define=APP_NAME="UTD - 20123009"
+    # 7. Proses Kompilasi APK Mode Production (Prod)
+    - name: Build APK Prod
+      run: flutter build apk --flavor prod --release --no-tree-shake-icons
 
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+    # 8. Mengunggah hasil APK ke server GitHub agar bisa di-download oleh Anda / Dosen
+    - name: Upload APK Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: uas-release-apks
+        path: |
+          build/app/outputs/flutter-apk/app-dev-release.apk
+          build/app/outputs/flutter-apk/app-prod-release.apk
