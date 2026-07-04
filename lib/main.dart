@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'core/config/env_config.dart';
-import 'core/di/injection.dart'; // Import locator ini
+import 'core/di/injection.dart';
 import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
 
-void main() {
+void main() async {
+  // Wajib dipanggil jika menggunakan async sebelum runApp
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Menginisialisasi GetIt Dependency Injection
-  setupLocator();
+  // Menanti inisialisasi Dependency Injection & Isar Database selesai
+  await setupLocator();
   
   runApp(const DigiNewsApp());
 }
