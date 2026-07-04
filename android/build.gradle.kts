@@ -5,42 +5,51 @@ allprojects {
     }
 }
 
-val newBuildDir: Directory =
-    rootProject.layout.buildDirectory
-        .dir("../../build")
-        .get()
-rootProject.layout.buildDirectory.value(newBuildDir)
+val sharedBuildDir = rootProject.layout.buildDirectory.dir("../../build").get().asFile
+rootProject.layout.buildDirectory.set(sharedBuildDir)
 
 subprojects {
-    val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
-    project.layout.buildDirectory.value(newSubprojectBuildDir)
-}
-
-subprojects {
-    project.evaluationDependsOn(":app")
-}
-
-tasks.register<Delete>("clean") {
-    delete(rootProject.layout.buildDirectory)
-}
-
-subprojects {
-    val configureNamespace = {
-        val androidExtension = project.extensions.findByName("android")
-        if (androidExtension != null) {
-            val namespaceMethod = androidExtension.javaClass.getMethod("getNamespace")
-            val setNamespaceMethod = androidExtension.javaClass.getMethod("setNamespace", String::class.java)
-            if (namespaceMethod.invoke(androidExtension) == null) {
-                setNamespaceMethod.invoke(androidExtension, project.group.toString())
+    // 1. Mengatur direktori build bersama untuk setiap subproyek
+    project.layout.buildDirectory.set(sharedBuildDir.resolve(project.name))
+    
+    // ==============================================================================
+    // PERBAIKAN UTAMA KOTLIN DSL: Pemaksaan Resolusi Dependensi untuk Semua Subproyek
+    // ==============================================================================
+    project.configurations.configureEach {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "androidx.core" && requested.name == "core") {
+                useVersion("1.13.1")
+            }
+            if (requested.group == "androidx.core" && requested.name == "core-ktx") {
+                useVersion("1.13.1")
             }
         }
     }
 
-    if (project.state.executed) {
-        configureNamespace()
-    } else {
-        project.afterEvaluate {
-            configureNamespace()
+    // 2. Menyuntikkan namespace & menyamakan SDK compile setelah subproyek dievaluasi
+    afterEvaluate {
+        // Khusus menangani isu namespace pada isar_flutter_libs
+        if (project.name == "isar_flutter_libs") {
+            extensions.findByName("android")?.let { androidExt ->
+                val baseExt = androidExt as? com.android.build.gradle.BaseExtension
+                if (baseExt?.namespace == null) {
+                    baseExt?.namespace = "dev.isar.isar_flutter_libs"
+                }
+            }
+        }
+        
+        // Memaksa subproyek menggunakan compileSdk 36 agar sinkron dengan shared_preferences_android
+        if (plugins.hasPlugin("com.android.application") || plugins.hasPlugin("com.android.library")) {
+            extensions.findByType<com.android.build.gradle.BaseExtension>()?.apply {
+                compileSdkVersion(36)
+                defaultConfig {
+                    targetSdkVersion(36)
+                }
+            }
         }
     }
+}
+
+tasks.register<Delete>("clean") {
+    delete(rootProject.layout.buildDirectory)
 }
