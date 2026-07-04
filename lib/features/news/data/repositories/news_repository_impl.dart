@@ -21,7 +21,7 @@ class NewsRepositoryImpl {
         // ⚠️ TANTANGAN ANTI-AI NIM GANJIL:
         // Digit terakhir NPM 20123009 adalah 9 (Ganjil).
         // Wajib mengurutkan data dari Z ke A (Descending) di layer Repository!
-        articles.sort((a, b) => b.title.compareTo(a.title));[cite: 1]
+        articles.sort((a, b) => b.title.compareTo(a.title));
 
         return articles;
       } else {

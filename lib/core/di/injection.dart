@@ -3,14 +3,14 @@ import 'package:dio/dio.dart';
 import '../config/env_config.dart';
 import '../../features/news/data/repositories/news_repository_impl.dart';
 
-final locator = GetIt.instance;[cite: 2]
+final locator = GetIt.instance;
 
-void setupLocator() {[cite: 2]
+void setupLocator() {
   // 1. Registrasi Client Dio untuk Networking
-  locator.registerLazySingleton<Dio>(() {[cite: 2]
-    final dio = Dio(BaseOptions(baseUrl: EnvConfig.baseUrl));[cite: 2]
+  locator.registerLazySingleton<Dio>(() {
+    final dio = Dio(BaseOptions(baseUrl: EnvConfig.baseUrl));
     // Menambahkan Interceptor standar sesuai modul praktikum
-    dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));[cite: 2]
+    dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
     return dio;
   });
 
