@@ -7,7 +7,9 @@ plugins {
 
 android {
     namespace = "com.example.utd_news_deden"
-    compileSdk = flutter.compileSdkVersion
+    
+    // 👑 Diubah ke 36 untuk mendukung pustaka Android modern
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -25,7 +27,9 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        
+        // 👑 Diubah ke 36 agar selaras dengan tuntutan library activity-ktx & core
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
