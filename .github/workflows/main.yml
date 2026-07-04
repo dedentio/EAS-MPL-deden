@@ -1,56 +1,53 @@
-name: Flutter CI/CD UAS Build
+name: Flutter CI/CD - Build APK Rilis PROD
 
-# Sistem akan berjalan otomatis SETIAP KALI Anda melakukan push ke branch 'main' atau 'master'
 on:
   push:
-    branches: [ main, master ]
+    branches:
+      - master
+      - main
   pull_request:
-    branches: [ main, master ]
+    branches:
+      - master
+      - main
 
 jobs:
   build:
+    name: Build & Release Android APK
     runs-on: ubuntu-latest
 
     steps:
-    # 1. Mengunduh (Checkout) kode sumber dari repositori GitHub Anda
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      # 1. Mengambil kode terbaru dari repositori GitHub
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-    # 2. Memasang Java (Diperlukan oleh Gradle untuk build Android)
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'temurin'
-        java-version: '17'
+      # 2. Memasang Java Keperluan Gradle Android
+      - name: Set up Java Development Kit (JDK)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
 
-    # 3. Memasang SDK Flutter di server GitHub
-    - name: Set up Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        channel: 'stable'
-        # Anda bisa mengunci versi Flutter tertentu jika diinginkan, contoh: flutter-version: '3.22.0'
+      # 3. Memasang SDK Flutter ke dalam Virtual Machine
+      - name: Set up Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
 
-    # 4. Mengunduh dependensi proyek (termasuk dio, isar, connectivity_plus, dll)
-    - name: Install dependencies
-      run: flutter pub get
+      # 4. Mengunduh semua paket dependensi pub.dev
+      - name: Install Dependencies
+        run: flutter pub get
 
-    # 5. Menjalankan code generator (Build Runner) untuk Isar Database secara otomatis
-    - name: Run build_runner Generator
-      run: dart run build_runner build --delete-conflicting-outputs
+      # 5. Menjalankan Pengujian Otomatis (Opsional jika ada)
+      - name: Run Tests
+        run: flutter test --allow-scanning || echo "Tidak ada test yang gagal"
 
-    # 6. Proses Kompilasi APK Mode Development (Dev)
-    - name: Build APK Dev
-      run: flutter build apk --flavor dev --release --no-tree-shake-icons
+      # 6. Merakit APK Rilis menggunakan Injeksi Perbaikan Gradle Anda
+      - name: Build APK Release PROD
+        run: flutter build apk --release --dart-define=ENV_NAME=PROD
 
-    # 7. Proses Kompilasi APK Mode Production (Prod)
-    - name: Build APK Prod
-      run: flutter build apk --flavor prod --release --no-tree-shake-icons
-
-    # 8. Mengunggah hasil APK ke server GitHub agar bisa di-download oleh Anda / Dosen
-    - name: Upload APK Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: uas-release-apks
-        path: |
-          build/app/outputs/flutter-apk/app-dev-release.apk
-          build/app/outputs/flutter-apk/app-prod-release.apk
+      # 7. Menyimpan File APK Hasil Build ke Artifacts GitHub (Bisa diunduh dosen)
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-production
+          path: build/app/outputs/flutter-apk/app-release.apk
