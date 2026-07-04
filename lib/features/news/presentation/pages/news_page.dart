@@ -26,6 +26,21 @@ class NewsPage extends StatelessWidget {
               onPressed: () => context.push('/profile'),
               child: const Text('Ke Halaman Profile'),
             ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () => context.push('/offline'),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.amber.shade100),
+              child: const Text('Cek Berita Offline (Isar Cache)', style: TextStyle(color: Colors.black)),
+            ),
+            const SizedBox(height: 10),
+            OutlinedButton(
+              onPressed: () => context.push('/detail', extra: {
+                'title': 'EAS Mobile Programming Lanjut Berbasis Anti-AI',
+                'content': 'Mahasiswa dengan NPM 20123009 mengimplementasikan Clean Architecture dengan sukses untuk portal berita DigiNews Offline-First.',
+                'imageUrl': 'https://picsum.photos/800/400'
+              }),
+              child: const Text('Uji Masuk Detail Berita'),
+            ),
           ],
         ),
       ),
